@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Store {
+  id         String     @id @default(uuid())
+  name       String
+  userId     String
+  createdAt  DateTime   @default(now())
+  billboards Client[]   @relation("StoreToClient")
+  suplier    Supplier[] @relation("StoreToSupplier")
+  product    Product[]  @relation("StoreToProduct")
+  updatedAt  DateTime   @updatedAt
+}
+
+model Client {
+  id      String        @id @default(uuid())
+  name    String
+  phone   String
+  storeId String
+  store   Store         @relation("StoreToClient", fields: [storeId], references: [id])
+  values  ClientValue[] @relation("ClientToClientValue")
+
+  @@index([storeId])
+}
+
+model ClientValue {
+  id        String   @id @default(uuid())
+  clientId  String
+  value     Float
+  type      String
+  client    Client   @relation("ClientToClientValue", fields: [clientId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+}
+
+model Supplier {
+  id       String @id @default(uuid())
+  name     String
+  phone    String
+  category String
+  company  String
+  storeId  String
+  store    Store  @relation("StoreToSupplier", fields: [storeId], references: [id])
+
+  @@index([storeId])
+}
+
+model Product {
+  id        String @id @default(uuid())
+  code      String
+  name      String
+  brand     String
+  quantity  Float
+  sellPrice Float
+  storeId   String
+  store     Store  @relation("StoreToProduct", fields: [storeId], references: [id])
+
+  sales Sale[] @relation("ProductSale")
+
+  @@index([storeId])
+}
+
+model Sale {
+  id            String   @id @default(uuid())
+  productId     String
+  products      Product  @relation("ProductSale", fields: [productId], references: [id])
+  createdAt     DateTime @default(now())
+  paymentMethod String
+
+  @@index([productId])
+}
