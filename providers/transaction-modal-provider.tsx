@@ -19,7 +19,7 @@ export function TransactionModalProvider() {
 
   return (
     <>
-      <TransactionModal clientId={params.clientId} />
+      <TransactionModal />
     </>
   );
 }

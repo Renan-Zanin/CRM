@@ -9,11 +9,11 @@ export function useSummary() {
     return transactions.reduce(
       (acc, transaction) => {
         if (transaction.type === "pago") {
-          acc.income += transaction.value;
-          acc.total += transaction.value;
+          acc.income += parseFloat(transaction.value);
+          acc.total += parseFloat(transaction.value);
         } else {
-          acc.outcome += transaction.value;
-          acc.total -= transaction.value;
+          acc.outcome += parseFloat(transaction.value);
+          acc.total -= parseFloat(transaction.value);
         }
 
         return acc;

@@ -6,10 +6,7 @@ import { ToasterProvider } from "@/providers/toast-provider";
 import { TransactionModalProvider } from "@/providers/transaction-modal-provider";
 import { TransactionsProvider } from "@/contexts/TransactionContext";
 import { SupplierModalProvider } from "@/providers/supplier-modal-provider";
-import { SuppliersProvider } from "@/contexts/SupplierContext";
 import { ProductModalProvider } from "@/providers/product-modal-provider";
-import { ProductsProvider } from "@/contexts/ProductContext";
-import { SearchProductModalProvider } from "@/providers/search-product-modal-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { StoreModalProvider } from "@/providers/store-modal-provider";
 
@@ -34,12 +31,9 @@ export default function RootLayout({
           <TransactionModalProvider />
           <ProductModalProvider />
           <SupplierModalProvider />
-          <SearchProductModalProvider />
           <TransactionsProvider>
             <StoreModalProvider />
-            <ProductsProvider>
-              <SuppliersProvider>{children}</SuppliersProvider>
-            </ProductsProvider>
+            {children}
           </TransactionsProvider>
         </body>
       </html>

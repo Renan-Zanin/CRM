@@ -23,7 +23,7 @@ export default function ClientTransactions() {
   const formatedTransactions: TransactionsTable[] = transactions.map(
     (transaction) => ({
       type: transaction.type.toLocaleUpperCase(),
-      value: priceFormatter.format(parseInt(transaction.value)),
+      value: priceFormatter.format(parseFloat(transaction.value)),
       id: transaction.id,
       clientId: transaction.clientId,
       createdAt: format(new Date(transaction.createdAt), "d/MM/yyyy HH:MM", {
