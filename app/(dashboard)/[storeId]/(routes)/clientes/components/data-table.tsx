@@ -26,6 +26,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { DataTableActions } from "./data-table-actions";
+import { ClientColumn } from "./columns";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -107,6 +108,7 @@ export function DataTable<TData, TValue>({
                           router.push(
                             `/${params.storeId}/clientes/${row.original.id}`
                           );
+                          console.log(cell.column.id);
                         }
                       }}
                     >
