@@ -28,7 +28,7 @@ import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { DataTableActions } from "./data-table-actions";
 import { ClientColumn } from "./columns";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData, TValue> extends ClientColumn {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
@@ -93,7 +93,7 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows?.map((row) => (
                 <TableRow
                   className="cursor-pointer"
                   key={row.id}
@@ -108,7 +108,7 @@ export function DataTable<TData, TValue>({
                           router.push(
                             `/${params.storeId}/clientes/${row.original.id}`
                           );
-                          console.log(cell.column.id);
+                          console.log("id", cell.column.id);
                         }
                       }}
                     >
