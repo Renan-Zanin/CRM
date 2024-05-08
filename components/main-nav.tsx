@@ -45,19 +45,6 @@ export default function MainNav({
       active: pathName === `/${params.storeId}/clientes`,
       icon: <Users2 size={30} />,
     },
-    {
-      href: `/${params.storeId}/fornecedores`,
-      label: "FORNECEDORES",
-      active: pathName === `/${params.storeId}/fornecedores`,
-      icon: <Truck size={30} />,
-    },
-
-    {
-      href: `/${params.storeId}/estoque`,
-      label: "ESTOQUE",
-      active: pathName === `/${params.storeId}/estoque`,
-      icon: <Package size={30} />,
-    },
   ];
 
   return (

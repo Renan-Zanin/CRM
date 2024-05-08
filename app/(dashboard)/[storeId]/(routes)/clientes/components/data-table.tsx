@@ -28,7 +28,7 @@ import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { DataTableActions } from "./data-table-actions";
 import { ClientColumn } from "./columns";
 
-interface DataTableProps<TData, TValue> extends ClientColumn {
+interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
@@ -57,6 +57,8 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
   });
+
+  const selectedTable = table.getRowModel();
 
   return (
     <div>
@@ -101,17 +103,7 @@ export function DataTable<TData, TValue>({
                   // onClick={() => }
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      onClick={() => {
-                        if (cell.column.id === "name") {
-                          router.push(
-                            `/${params.storeId}/clientes/${row.original.id}`
-                          );
-                          console.log("id", cell.column.id);
-                        }
-                      }}
-                    >
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
