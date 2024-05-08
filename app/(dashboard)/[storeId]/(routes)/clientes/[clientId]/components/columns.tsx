@@ -8,13 +8,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 export type ValueColumn = {
   id: string;
   clientId: string;
-  value: number;
+  value: string;
   type: string;
   createdAt: string;
 };
-
-if (window.matchMedia("(max-width: 768px)")) {
-}
 
 export const columns: ColumnDef<ValueColumn>[] = [
   {

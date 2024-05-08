@@ -12,7 +12,7 @@ import { ptBR } from "date-fns/locale";
 interface TransactionsTable {
   id: string;
   clientId: string;
-  value: number;
+  value: string;
   type: string;
   createdAt: string;
 }
@@ -23,7 +23,7 @@ export default function ClientTransactions() {
   const formatedTransactions: TransactionsTable[] = transactions.map(
     (transaction) => ({
       type: transaction.type.toLocaleUpperCase(),
-      value: priceFormatter.format(transaction.value),
+      value: priceFormatter.format(parseInt(transaction.value)),
       id: transaction.id,
       clientId: transaction.clientId,
       createdAt: format(new Date(transaction.createdAt), "d/MM/yyyy HH:MM", {
