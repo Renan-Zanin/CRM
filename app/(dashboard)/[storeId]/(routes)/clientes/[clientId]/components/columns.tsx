@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import CellAction from "./cell-action";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowUpDown } from "lucide-react";
 
 export type ValueColumn = {
   id: string;
@@ -43,7 +44,17 @@ export const columns: ColumnDef<ValueColumn>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Data",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Data
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     id: "actions",
