@@ -36,7 +36,15 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       await axios
         .get(`/api/${params.storeId}/clients/${params.clientId}/transaction`)
         .then((response) => {
-          setTransactions(response.data);
+          const sortedTransactions = response.data.sort(
+            (a: ValueColumn, b: ValueColumn) => {
+              return (
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+              );
+            }
+          );
+          setTransactions(sortedTransactions);
         })
         .catch((err) => {
           toast.error("Transações não encontradas");
