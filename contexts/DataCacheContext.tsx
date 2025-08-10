@@ -163,8 +163,15 @@ interface DataCacheContextType {
   openCashRegister: (storeId: string, openingAmount: number) => Promise<any>;
   closeCashRegister: (storeId: string, cashRegisterId: string) => Promise<any>;
   addTransaction: (cashRegisterId: string, transaction: any) => Promise<any>;
-  updateTransaction: (cashRegisterId: string, transactionId: string, transaction: any) => Promise<any>;
-  deleteTransaction: (cashRegisterId: string, transactionId: string) => Promise<void>;
+  updateTransaction: (
+    cashRegisterId: string,
+    transactionId: string,
+    transaction: any
+  ) => Promise<any>;
+  deleteTransaction: (
+    cashRegisterId: string,
+    transactionId: string
+  ) => Promise<void>;
 }
 
 const DataCacheContext = createContext<DataCacheContextType | undefined>(
@@ -538,7 +545,11 @@ export function DataCacheProvider({ children }: { children: React.ReactNode }) {
         );
         dispatch({
           type: "UPDATE_ITEM",
-          payload: { entity: "transactions", id: transactionId, item: response.data },
+          payload: {
+            entity: "transactions",
+            id: transactionId,
+            item: response.data,
+          },
         });
         return response.data;
       } catch (error) {

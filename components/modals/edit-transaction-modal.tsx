@@ -31,7 +31,14 @@ import { useDataCache } from "@/contexts/DataCacheContext";
 const formSchema = z.object({
   amount: z.string().min(1, "Valor é obrigatório"),
   type: z.enum(["incoming", "outgoing", "fiado_pending"]),
-  paymentMethod: z.enum(["cash", "credit_card", "debit_card", "pix", "fiado", "fiado_payment"]),
+  paymentMethod: z.enum([
+    "cash",
+    "credit_card",
+    "debit_card",
+    "pix",
+    "fiado",
+    "fiado_payment",
+  ]),
   description: z.string().optional(),
 });
 
@@ -41,7 +48,9 @@ interface EditTransactionModalProps {
   cashRegisterId?: string;
 }
 
-export function EditTransactionModal({ cashRegisterId }: EditTransactionModalProps) {
+export function EditTransactionModal({
+  cashRegisterId,
+}: EditTransactionModalProps) {
   const [loading, setLoading] = useState(false);
   const editTransactionModal = useEditTransactionModal();
   const { updateTransaction } = useDataCache();
@@ -170,10 +179,7 @@ export function EditTransactionModal({ cashRegisterId }: EditTransactionModalPro
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Método de Pagamento</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o método" />

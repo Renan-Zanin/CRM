@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, DollarSign, TrendingUp, TrendingDown, Edit, Trash2 } from "lucide-react";
+import {
+  Plus,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Edit,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -32,8 +39,13 @@ export default function CashRegisterPage({ params }: CashRegisterPageProps) {
   const cashRegisterModal = useCashRegisterModal();
   const transactionModal = useTransactionModal();
   const editTransactionModal = useEditTransactionModal();
-  const { state, fetchCashRegisters, fetchTransactions, closeCashRegister, deleteTransaction } =
-    useDataCache();
+  const {
+    state,
+    fetchCashRegisters,
+    fetchTransactions,
+    closeCashRegister,
+    deleteTransaction,
+  } = useDataCache();
 
   useEffect(() => {
     loadData();
@@ -336,9 +348,12 @@ export default function CashRegisterPage({ params }: CashRegisterPageProps) {
                                 : "text-red-600"
                             }`}
                           >
-                            {transaction.type === "incoming" ? "+" : 
-                             transaction.type === "fiado_pending" ? "⏳" : "-"}R${" "}
-                            {transaction.amount.toFixed(2)}
+                            {transaction.type === "incoming"
+                              ? "+"
+                              : transaction.type === "fiado_pending"
+                              ? "⏳"
+                              : "-"}
+                            R$ {transaction.amount.toFixed(2)}
                           </div>
                           <div className="flex space-x-1">
                             <Button
@@ -352,7 +367,9 @@ export default function CashRegisterPage({ params }: CashRegisterPageProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleDeleteTransaction(transaction.id)}
+                              onClick={() =>
+                                handleDeleteTransaction(transaction.id)
+                              }
                               disabled={loading}
                               className="text-red-600 hover:text-red-700"
                             >

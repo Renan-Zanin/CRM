@@ -1,4 +1,9 @@
 {
   "buildCommand": "prisma generate && prisma db push && next build",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "functions": {
+    "app/api/**/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }

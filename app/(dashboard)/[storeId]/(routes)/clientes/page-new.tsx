@@ -6,7 +6,7 @@ import Client from "./components/client";
 import { ClientColumn } from "./components/columns";
 import { telephoneFormatter } from "@/utils/phoneFormater";
 import { useDataCache } from "@/contexts/DataCacheContext";
-import { Loading } from "@/components/ui/loading";
+import Loading from "@/components/ui/loading";
 
 export default function ClientsPage() {
   const params = useParams();

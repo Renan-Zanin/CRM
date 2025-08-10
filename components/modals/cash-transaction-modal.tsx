@@ -34,7 +34,14 @@ import { useDataCache } from "@/contexts/DataCacheContext";
 const cashTransactionSchema = z.object({
   amount: z.string().min(1, "Valor é obrigatório"),
   type: z.enum(["incoming", "outgoing", "fiado_pending"]),
-  paymentMethod: z.enum(["cash", "credit_card", "debit_card", "pix", "fiado", "fiado_payment"]),
+  paymentMethod: z.enum([
+    "cash",
+    "credit_card",
+    "debit_card",
+    "pix",
+    "fiado",
+    "fiado_payment",
+  ]),
   description: z.string().optional(),
 });
 

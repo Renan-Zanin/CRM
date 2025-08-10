@@ -68,8 +68,12 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
   const [chartType, setChartType] = useState<"bar" | "line" | "pie">("bar");
   const [dateRange, setDateRange] = useState(15);
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [paymentMethodData, setPaymentMethodData] = useState<PaymentMethodData[]>([]);
-  const [dataFilter, setDataFilter] = useState<"all" | "incoming" | "outgoing" | "profit">("all");
+  const [paymentMethodData, setPaymentMethodData] = useState<
+    PaymentMethodData[]
+  >([]);
+  const [dataFilter, setDataFilter] = useState<
+    "all" | "incoming" | "outgoing" | "profit"
+  >("all");
 
   useEffect(() => {
     fetchCashRegisters(storeId);
@@ -84,7 +88,7 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
   const processChartData = () => {
     const endDate = new Date();
     const startDate = subDays(endDate, dateRange);
-    
+
     const filteredRegisters = state.cashRegisters.filter((register) => {
       const registerDate = new Date(register.openingDate);
       return (
@@ -118,7 +122,7 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
       // Processar métodos de pagamento
       register.transactions?.forEach((transaction: any) => {
         // Filtrar pagamentos de fiado dos gráficos de método de pagamento
-        if (transaction.paymentMethod !== 'fiado_payment') {
+        if (transaction.paymentMethod !== "fiado_payment") {
           const method = transaction.paymentMethod;
           const currentTotal = paymentMethodTotals.get(method) || 0;
           paymentMethodTotals.set(method, currentTotal + transaction.amount);
@@ -137,7 +141,9 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
     const paymentMethodArray: PaymentMethodData[] = Array.from(
       paymentMethodTotals.entries()
     ).map(([method, value]) => ({
-      method: PAYMENT_METHOD_LABELS[method as keyof typeof PAYMENT_METHOD_LABELS] || method,
+      method:
+        PAYMENT_METHOD_LABELS[method as keyof typeof PAYMENT_METHOD_LABELS] ||
+        method,
       value,
       color: COLORS[method as keyof typeof COLORS] || "#8884d8",
     }));
@@ -150,13 +156,24 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
     const getFilteredBars = () => {
       const bars = [];
       if (dataFilter === "all" || dataFilter === "incoming") {
-        bars.push(<Bar key="incoming" dataKey="incoming" fill="#00C49F" name="Entradas" />);
+        bars.push(
+          <Bar
+            key="incoming"
+            dataKey="incoming"
+            fill="#00C49F"
+            name="Entradas"
+          />
+        );
       }
       if (dataFilter === "all" || dataFilter === "outgoing") {
-        bars.push(<Bar key="outgoing" dataKey="outgoing" fill="#FF8042" name="Saídas" />);
+        bars.push(
+          <Bar key="outgoing" dataKey="outgoing" fill="#FF8042" name="Saídas" />
+        );
       }
       if (dataFilter === "all" || dataFilter === "profit") {
-        bars.push(<Bar key="profit" dataKey="profit" fill="#0088FE" name="Lucro" />);
+        bars.push(
+          <Bar key="profit" dataKey="profit" fill="#0088FE" name="Lucro" />
+        );
       }
       return bars;
     };
@@ -309,9 +326,9 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
             {/* Filtro de dados */}
             <Select
               value={dataFilter}
-              onValueChange={(value: "all" | "incoming" | "outgoing" | "profit") =>
-                setDataFilter(value)
-              }
+              onValueChange={(
+                value: "all" | "incoming" | "outgoing" | "profit"
+              ) => setDataFilter(value)}
             >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filtrar dados" />

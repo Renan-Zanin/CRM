@@ -32,7 +32,9 @@ export async function PATCH(
     }
 
     if (!paymentMethod) {
-      return new NextResponse("Método de pagamento é necessário", { status: 400 });
+      return new NextResponse("Método de pagamento é necessário", {
+        status: 400,
+      });
     }
 
     // Verificar se a transação existe e pertence ao cash register correto
@@ -55,7 +57,10 @@ export async function PATCH(
     });
 
     if (!cashRegister || !cashRegister.isOpen) {
-      return new NextResponse("Não é possível editar transações de um caixa fechado", { status: 400 });
+      return new NextResponse(
+        "Não é possível editar transações de um caixa fechado",
+        { status: 400 }
+      );
     }
 
     const transaction = await prismadb.cashTransaction.update({
@@ -116,7 +121,10 @@ export async function DELETE(
     });
 
     if (!cashRegister || !cashRegister.isOpen) {
-      return new NextResponse("Não é possível deletar transações de um caixa fechado", { status: 400 });
+      return new NextResponse(
+        "Não é possível deletar transações de um caixa fechado",
+        { status: 400 }
+      );
     }
 
     await prismadb.cashTransaction.delete({
