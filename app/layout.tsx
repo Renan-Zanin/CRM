@@ -5,8 +5,11 @@ import { ModalProvider } from "@/providers/modal-provider";
 import { ToasterProvider } from "@/providers/toast-provider";
 import { TransactionModalProvider } from "@/providers/transaction-modal-provider";
 import { TransactionsProvider } from "@/contexts/TransactionContext";
+import { DataCacheProvider } from "@/contexts/DataCacheContext";
 import { SupplierModalProvider } from "@/providers/supplier-modal-provider";
 import { ProductModalProvider } from "@/providers/product-modal-provider";
+import { CashRegisterModalProvider } from "@/providers/cash-register-modal-provider";
+import { EditTransactionModalProvider } from "@/providers/edit-transaction-modal-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { StoreModalProvider } from "@/providers/store-modal-provider";
 
@@ -26,15 +29,19 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={inter.className}>
-          <ToasterProvider />
-          <ModalProvider />
-          <TransactionModalProvider />
-          <ProductModalProvider />
-          <SupplierModalProvider />
-          <TransactionsProvider>
-            <StoreModalProvider />
-            {children}
-          </TransactionsProvider>
+          <DataCacheProvider>
+            <ToasterProvider />
+            <ModalProvider />
+            <TransactionModalProvider />
+            <ProductModalProvider />
+            <SupplierModalProvider />
+            <CashRegisterModalProvider />
+            <EditTransactionModalProvider />
+            <TransactionsProvider>
+              <StoreModalProvider />
+              {children}
+            </TransactionsProvider>
+          </DataCacheProvider>
         </body>
       </html>
     </ClerkProvider>

@@ -9,6 +9,13 @@ import { toast } from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   Form,
@@ -22,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTransactionModal } from "@/hooks/useTransactionModal";
 import { useParams } from "next/navigation";
+import { useDataCache } from "@/contexts/DataCacheContext";
 
 const formSchema = z.object({
   value: z
@@ -35,10 +43,28 @@ const formSchema = z.object({
   }),
 });
 
-type NewTransactionFormInput = z.infer<typeof formSchema>;
+// Schema para transações de caixa
+const cashTransactionSchema = z.object({
+  amount: z.string().min(1, "Valor é obrigatório"),
+  type: z.enum(["incoming", "outgoing"]),
+  paymentMethod: z.enum(["cash", "credit_card", "debit_card", "pix", "fiado"]),
+  description: z.string().optional(),
+});
 
-export function TransactionModal() {
+type NewTransactionFormInput = z.infer<typeof formSchema>;
+type CashTransactionFormInput = z.infer<typeof cashTransactionSchema>;
+
+interface TransactionModalProps {
+  cashRegisterId?: string;
+  mode?: "client" | "cash";
+}
+
+export function TransactionModal({
+  cashRegisterId,
+  mode = "client",
+}: TransactionModalProps) {
   const transactionModal = useTransactionModal();
+  const { addTransaction } = useDataCache();
 
   const params = useParams();
 

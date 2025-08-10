@@ -45,6 +45,12 @@ export default function MainNav({
       active: pathName === `/${params.storeId}/clientes`,
       icon: <Users2 size={30} />,
     },
+    {
+      href: `/${params.storeId}/caixa`,
+      label: "CAIXA",
+      active: pathName === `/${params.storeId}/caixa`,
+      icon: <DollarSign size={30} />,
+    },
   ];
 
   return (

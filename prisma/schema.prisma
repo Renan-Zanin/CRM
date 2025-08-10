@@ -12,14 +12,15 @@ datasource db {
 }
 
 model Store {
-  id         String     @id @default(uuid())
+  id         String          @id @default(uuid())
   name       String
   userId     String
-  createdAt  DateTime   @default(now())
-  billboards Client[]   @relation("StoreToClient")
-  suplier    Supplier[] @relation("StoreToSupplier")
-  product    Product[]  @relation("StoreToProduct")
-  updatedAt  DateTime   @updatedAt
+  createdAt  DateTime        @default(now())
+  billboards Client[]        @relation("StoreToClient")
+  suplier    Supplier[]      @relation("StoreToSupplier")
+  product    Product[]       @relation("StoreToProduct")
+  cashRegisters CashRegister[] @relation("StoreToCashRegister")
+  updatedAt  DateTime        @updatedAt
 }
 
 model Client {
@@ -79,4 +80,37 @@ model Sale {
   paymentMethod String
 
   @@index([productId])
+}
+
+model CashRegister {
+  id              String               @id @default(uuid())
+  storeId         String
+  store           Store                @relation("StoreToCashRegister", fields: [storeId], references: [id])
+  openingAmount   Float
+  openingDate     DateTime             @default(now())
+  closingDate     DateTime?
+  closingAmount   Float?
+  totalIncoming   Float                @default(0)
+  totalOutgoing   Float                @default(0)
+  profit          Float?
+  isOpen          Boolean              @default(true)
+  userId          String
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  transactions    CashTransaction[]    @relation("CashRegisterToTransaction")
+
+  @@index([storeId])
+}
+
+model CashTransaction {
+  id              String        @id @default(uuid())
+  cashRegisterId  String
+  cashRegister    CashRegister  @relation("CashRegisterToTransaction", fields: [cashRegisterId], references: [id])
+  amount          Float
+  type            String        // "incoming", "outgoing", "fiado_pending"
+  paymentMethod   String        // "cash", "credit_card", "debit_card", "pix", "fiado", "fiado_payment"
+  description     String?
+  createdAt       DateTime      @default(now())
+
+  @@index([cashRegisterId])
 }

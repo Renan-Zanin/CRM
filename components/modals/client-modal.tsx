@@ -4,11 +4,11 @@ import { useState } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useClientModal } from "@/hooks/use-client-modal";
 import { Modal } from "@/components/ui/modal";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useDataCache } from "@/contexts/DataCacheContext";
 
 import {
   Form,
@@ -28,8 +28,8 @@ const formSchema = z.object({
 
 export function ClientModal() {
   const params = useParams();
-
   const clientModal = useClientModal();
+  const { addClient } = useDataCache();
 
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +37,7 @@ export function ClientModal() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      phone: "",
     },
   });
 
@@ -44,16 +45,11 @@ export function ClientModal() {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        `/api/${params.storeId}/clients`,
-        values
-      );
-
-      window.location.assign(`/${params.storeId}/clientes`);
-
-      console.log(response.data);
+      await addClient(params.storeId as string, values);
 
       toast.success("Cliente criado com sucesso");
+      clientModal.onClose();
+      form.reset();
     } catch (err) {
       toast.error("Algo deu errado");
     } finally {
