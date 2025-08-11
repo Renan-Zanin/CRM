@@ -27,6 +27,7 @@ import {
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useDataCache } from "@/contexts/DataCacheContext";
+import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
 interface CashAnalyticsProps {
   storeId: string;
@@ -37,6 +38,12 @@ interface ChartData {
   incoming: number;
   outgoing: number;
   profit: number;
+}
+
+interface SummaryData {
+  totalIncoming: number;
+  totalOutgoing: number;
+  totalProfit: number;
 }
 
 interface PaymentMethodData {
@@ -50,6 +57,8 @@ const COLORS = {
   credit_card: "#00C49F",
   debit_card: "#FFBB28",
   pix: "#FF8042",
+  va: "#32CD32",
+  vr: "#FF6347",
   fiado: "#8A2BE2",
   fiado_payment: "#FF69B4",
 };
@@ -59,6 +68,8 @@ const PAYMENT_METHOD_LABELS = {
   credit_card: "Cartão de Crédito",
   debit_card: "Cartão de Débito",
   pix: "PIX",
+  va: "Vale Alimentação",
+  vr: "Vale Refeição",
   fiado: "Fiado",
   fiado_payment: "Pagamento de Fiado",
 };
@@ -71,19 +82,29 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
   const [paymentMethodData, setPaymentMethodData] = useState<
     PaymentMethodData[]
   >([]);
+  const [summaryData, setSummaryData] = useState<SummaryData>({
+    totalIncoming: 0,
+    totalOutgoing: 0,
+    totalProfit: 0,
+  });
   const [dataFilter, setDataFilter] = useState<
     "all" | "incoming" | "outgoing" | "profit"
   >("all");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     fetchCashRegisters(storeId);
   }, [storeId, fetchCashRegisters]);
 
   useEffect(() => {
-    if (state.cashRegisters.length > 0) {
+    if (state.cashRegisters.length > 0 && mounted) {
       processChartData();
     }
-  }, [state.cashRegisters, dateRange]);
+  }, [state.cashRegisters, dateRange, mounted]);
 
   const processChartData = () => {
     const endDate = new Date();
@@ -104,6 +125,11 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
 
     const paymentMethodTotals = new Map<string, number>();
 
+    // Variáveis para calcular totais do período
+    let totalIncoming = 0;
+    let totalOutgoing = 0;
+    let totalProfit = 0;
+
     filteredRegisters.forEach((register) => {
       const registerDate = new Date(register.openingDate);
       const dateKey = format(registerDate, "dd/MM", {
@@ -115,19 +141,49 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
       }
 
       const dayData = dailyData.get(dateKey)!;
-      dayData.incoming += register.totalIncoming || 0;
-      dayData.outgoing += register.totalOutgoing || 0;
-      dayData.profit += register.profit || 0;
 
-      // Processar métodos de pagamento
+      // Calcular valores excluindo transações fiado DEVE
+      let registerIncoming = 0;
+      let registerOutgoing = 0;
+      let registerProfit = 0;
+
       register.transactions?.forEach((transaction: any) => {
-        // Filtrar pagamentos de fiado dos gráficos de método de pagamento
-        if (transaction.paymentMethod !== "fiado_payment") {
+        const isDebtTransaction =
+          transaction.paymentMethod === "fiado" && transaction.type === "DEVE";
+
+        // Para cálculos de entrada/saída/lucro: incluir apenas transações que não sejam fiado DEVE
+        if (!isDebtTransaction) {
+          if (transaction.type === "incoming") {
+            registerIncoming += transaction.amount;
+          } else if (transaction.type === "outgoing") {
+            registerOutgoing += transaction.amount;
+          }
+        }
+
+        // Para gráfico de pizza: incluir transações fiado DEVE apenas no método fiado
+        if (isDebtTransaction) {
+          const currentTotal = paymentMethodTotals.get("fiado") || 0;
+          paymentMethodTotals.set("fiado", currentTotal + transaction.amount);
+        }
+        // Para outros métodos: incluir apenas transações que não sejam fiado DEVE
+        else if (transaction.paymentMethod !== "fiado_payment") {
           const method = transaction.paymentMethod;
           const currentTotal = paymentMethodTotals.get(method) || 0;
           paymentMethodTotals.set(method, currentTotal + transaction.amount);
         }
       });
+
+      // Calcular lucro excluindo fiado DEVE
+      registerProfit = registerIncoming - registerOutgoing;
+
+      dayData.incoming += registerIncoming;
+      dayData.outgoing += registerOutgoing;
+      dayData.profit += registerProfit;
+
+      // Somar aos totais do período
+      totalIncoming += registerIncoming;
+      totalOutgoing += registerOutgoing;
+      totalProfit += registerProfit;
     });
 
     // Converter para array para gráficos
@@ -150,6 +206,11 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
 
     setChartData(chartDataArray);
     setPaymentMethodData(paymentMethodArray);
+    setSummaryData({
+      totalIncoming,
+      totalOutgoing,
+      totalProfit,
+    });
   };
 
   const renderChart = () => {
@@ -287,6 +348,111 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
 
   return (
     <div className="space-y-4">
+      {!mounted ? (
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total de Entradas
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">R$ 0,00</div>
+              <p className="text-xs text-muted-foreground">Carregando...</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total de Saídas
+              </CardTitle>
+              <TrendingDown className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">R$ 0,00</div>
+              <p className="text-xs text-muted-foreground">Carregando...</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Lucro Total</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">R$ 0,00</div>
+              <p className="text-xs text-muted-foreground">Carregando...</p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        /* Cards de Resumo por Período */
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total de Entradas
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                R$ {summaryData.totalIncoming.toFixed(2)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Últimos {dateRange} dias
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total de Saídas
+              </CardTitle>
+              <TrendingDown className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                R$ {summaryData.totalOutgoing.toFixed(2)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Últimos {dateRange} dias
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Lucro Total</CardTitle>
+              <DollarSign
+                className={`h-4 w-4 ${
+                  summaryData.totalProfit >= 0
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              />
+            </CardHeader>
+            <CardContent>
+              <div
+                className={`text-2xl font-bold ${
+                  summaryData.totalProfit >= 0
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                R$ {summaryData.totalProfit.toFixed(2)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Últimos {dateRange} dias
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Controles do Gráfico */}
       <Card>
         <CardHeader>
@@ -342,7 +508,15 @@ export const CashAnalytics: React.FC<CashAnalyticsProps> = ({ storeId }) => {
             </Select>
           </div>
         </CardHeader>
-        <CardContent>{renderChart()}</CardContent>
+        <CardContent>
+          {mounted ? (
+            renderChart()
+          ) : (
+            <div className="w-full h-[400px] flex items-center justify-center bg-gray-50 rounded-lg">
+              <p className="text-gray-500">Carregando gráfico...</p>
+            </div>
+          )}
+        </CardContent>
       </Card>
     </div>
   );

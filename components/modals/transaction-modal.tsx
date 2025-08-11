@@ -47,7 +47,7 @@ const formSchema = z.object({
 const cashTransactionSchema = z.object({
   amount: z.string().min(1, "Valor é obrigatório"),
   type: z.enum(["incoming", "outgoing"]),
-  paymentMethod: z.enum(["cash", "credit_card", "debit_card", "pix", "fiado"]),
+  paymentMethod: z.enum(["cash", "credit_card", "debit_card", "pix", "va", "vr", "fiado"]),
   description: z.string().optional(),
 });
 

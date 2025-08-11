@@ -116,16 +116,20 @@ export default function CashRegisterPage({ params }: CashRegisterPageProps) {
   };
 
   const calculateTotals = () => {
-    const incoming = transactions
+    // Filtrar transações excluindo fiado DEVE dos cálculos principais
+    const validTransactions = transactions.filter((transaction) => {
+      const isDebtTransaction =
+        transaction.paymentMethod === "fiado" && transaction.type === "DEVE";
+      return !isDebtTransaction;
+    });
+
+    const incoming = validTransactions
       .filter((t) => t.type === "incoming")
       .reduce((sum, t) => sum + t.amount, 0);
 
-    const outgoing = transactions
+    const outgoing = validTransactions
       .filter((t) => t.type === "outgoing")
       .reduce((sum, t) => sum + t.amount, 0);
-
-    // Transações fiado_pending não entram no cálculo de totais
-    // mas ficam registradas para o gráfico de métodos de pagamento
 
     const currentTotal = currentCashRegister
       ? currentCashRegister.openingAmount + incoming - outgoing
@@ -141,6 +145,8 @@ export default function CashRegisterPage({ params }: CashRegisterPageProps) {
     credit_card: "Cartão de Crédito",
     debit_card: "Cartão de Débito",
     pix: "PIX",
+    va: "Vale Alimentação",
+    vr: "Vale Refeição",
     fiado: "Fiado",
     fiado_payment: "Pagamento de Fiado",
   };
@@ -231,7 +237,13 @@ export default function CashRegisterPage({ params }: CashRegisterPageProps) {
                     R$ {incoming.toFixed(2)}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {transactions.filter((t) => t.type === "incoming").length}{" "}
+                    {
+                      transactions.filter((t) => {
+                        const isDebtTransaction =
+                          t.paymentMethod === "fiado" && t.type === "DEVE";
+                        return t.type === "incoming" && !isDebtTransaction;
+                      }).length
+                    }{" "}
                     transações
                   </p>
                 </CardContent>
@@ -249,7 +261,13 @@ export default function CashRegisterPage({ params }: CashRegisterPageProps) {
                     R$ {outgoing.toFixed(2)}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {transactions.filter((t) => t.type === "outgoing").length}{" "}
+                    {
+                      transactions.filter((t) => {
+                        const isDebtTransaction =
+                          t.paymentMethod === "fiado" && t.type === "DEVE";
+                        return t.type === "outgoing" && !isDebtTransaction;
+                      }).length
+                    }{" "}
                     transações
                   </p>
                 </CardContent>
@@ -289,96 +307,104 @@ export default function CashRegisterPage({ params }: CashRegisterPageProps) {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {transactions.map((transaction) => (
-                      <div
-                        key={transaction.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div
-                            className={`p-2 rounded-full ${
-                              transaction.type === "incoming"
-                                ? "bg-green-100 text-green-600"
-                                : transaction.type === "fiado_pending"
-                                ? "bg-yellow-100 text-yellow-600"
-                                : "bg-red-100 text-red-600"
-                            }`}
-                          >
-                            {transaction.type === "incoming" ? (
-                              <TrendingUp className="h-4 w-4" />
-                            ) : transaction.type === "fiado_pending" ? (
-                              <DollarSign className="h-4 w-4" />
-                            ) : (
-                              <TrendingDown className="h-4 w-4" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-medium">
-                              {transaction.type === "incoming"
-                                ? "Entrada"
-                                : transaction.type === "fiado_pending"
-                                ? "Fiado Pendente"
-                                : "Saída"}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {
-                                paymentMethodLabels[
-                                  transaction.paymentMethod as keyof typeof paymentMethodLabels
-                                ]
-                              }
-                              {transaction.description &&
-                                ` • ${transaction.description}`}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {format(
-                                new Date(transaction.createdAt),
-                                "HH:mm",
-                                { locale: ptBR }
+                    {transactions
+                      .sort(
+                        (a, b) =>
+                          new Date(b.createdAt).getTime() -
+                          new Date(a.createdAt).getTime()
+                      )
+                      .map((transaction) => (
+                        <div
+                          key={transaction.id}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div
+                              className={`p-2 rounded-full ${
+                                transaction.type === "incoming"
+                                  ? "bg-green-100 text-green-600"
+                                  : transaction.type === "fiado_pending"
+                                  ? "bg-yellow-100 text-yellow-600"
+                                  : "bg-red-100 text-red-600"
+                              }`}
+                            >
+                              {transaction.type === "incoming" ? (
+                                <TrendingUp className="h-4 w-4" />
+                              ) : transaction.type === "fiado_pending" ? (
+                                <DollarSign className="h-4 w-4" />
+                              ) : (
+                                <TrendingDown className="h-4 w-4" />
                               )}
-                            </p>
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {transaction.type === "incoming"
+                                  ? "Entrada"
+                                  : transaction.type === "fiado_pending"
+                                  ? "Fiado Pendente"
+                                  : "Saída"}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {
+                                  paymentMethodLabels[
+                                    transaction.paymentMethod as keyof typeof paymentMethodLabels
+                                  ]
+                                }
+                                {transaction.description &&
+                                  ` • ${transaction.description}`}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {format(
+                                  new Date(transaction.createdAt),
+                                  "HH:mm",
+                                  { locale: ptBR }
+                                )}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div
-                            className={`text-lg font-semibold ${
-                              transaction.type === "incoming"
-                                ? "text-green-600"
+                          <div className="flex items-center space-x-2">
+                            <div
+                              className={`text-lg font-semibold ${
+                                transaction.type === "incoming"
+                                  ? "text-green-600"
+                                  : transaction.type === "fiado_pending"
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
+                              }`}
+                            >
+                              {transaction.type === "incoming"
+                                ? "+"
                                 : transaction.type === "fiado_pending"
-                                ? "text-yellow-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {transaction.type === "incoming"
-                              ? "+"
-                              : transaction.type === "fiado_pending"
-                              ? "⏳"
-                              : "-"}
-                            R$ {transaction.amount.toFixed(2)}
-                          </div>
-                          <div className="flex space-x-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditTransaction(transaction)}
-                              disabled={loading}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleDeleteTransaction(transaction.id)
-                              }
-                              disabled={loading}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                                ? "⏳"
+                                : "-"}
+                              R$ {transaction.amount.toFixed(2)}
+                            </div>
+                            <div className="flex space-x-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleEditTransaction(transaction)
+                                }
+                                disabled={loading}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleDeleteTransaction(transaction.id)
+                                }
+                                disabled={loading}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 )}
               </CardContent>

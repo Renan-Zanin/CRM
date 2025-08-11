@@ -108,7 +108,7 @@ model CashTransaction {
   cashRegister    CashRegister  @relation("CashRegisterToTransaction", fields: [cashRegisterId], references: [id])
   amount          Float
   type            String        // "incoming", "outgoing", "fiado_pending"
-  paymentMethod   String        // "cash", "credit_card", "debit_card", "pix", "fiado", "fiado_payment"
+  paymentMethod   String        // "cash", "credit_card", "debit_card", "pix", "va", "vr", "fiado", "fiado_payment"
   description     String?
   createdAt       DateTime      @default(now())
 

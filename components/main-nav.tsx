@@ -51,6 +51,12 @@ export default function MainNav({
       active: pathName === `/${params.storeId}/caixa`,
       icon: <DollarSign size={30} />,
     },
+    {
+      href: `/${params.storeId}/historico`,
+      label: "HISTÓRICO",
+      active: pathName === `/${params.storeId}/historico`,
+      icon: <History size={30} />,
+    },
   ];
 
   return (

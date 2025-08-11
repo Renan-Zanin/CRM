@@ -36,6 +36,8 @@ const formSchema = z.object({
     "credit_card",
     "debit_card",
     "pix",
+    "va",
+    "vr",
     "fiado",
     "fiado_payment",
   ]),
@@ -60,6 +62,8 @@ export function EditTransactionModal({
     credit_card: "Cartão de Crédito",
     debit_card: "Cartão de Débito",
     pix: "PIX",
+    va: "Vale Alimentação",
+    vr: "Vale Refeição",
     fiado: "Fiado",
     fiado_payment: "Pagamento de Fiado",
   };
